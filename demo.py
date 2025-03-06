@@ -1,11 +1,10 @@
 from pyamaze import maze, COLOR, agent, textLabel
-m=maze()
+m=maze(5, 5)
 m.CreateMaze()
 
-a = agent(m, 5, 5, filled=True, color = COLOR.red, footprints=True)
-b = agent(m, 5, 6, filled=True, color = COLOR.yellow, footprints=True)
+a = agent(m, filled=True, footprints=True)
 
 l = textLabel(m, 'Total Cells', m.rows*m.cols)
-
-m.tracePath({a:m.path, b:m.path})
+print(m.maze_map)
+m.tracePath({a:m.path})
 m.run()
