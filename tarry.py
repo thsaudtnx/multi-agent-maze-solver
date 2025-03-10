@@ -25,74 +25,69 @@ def Tarry(m, num_of_agents):
     explored = {i : [start] for i in range(num_of_agents)}
     total_explored = [start]
 
-    r = 30
-
-    while frontier and r > 0:
-
-        r -= 1
+    while frontier:
 
         print(f"frontier: {frontier}")
         print(f"total explored: {total_explored}")
         
-        current_agent_idx, current_location = frontier.pop(0)
-
-        others_explored_next_location = []
-        possible_next_location = []
-        possible_prev_location = []
+        cur_agent_idx, cur_location = frontier.pop(0)
         
-        if current_location == end:
+        if cur_location == end:
             continue
         
+        not_explored_next_location = []
+        possible_next_location = []
+
         for d in 'ESNW':
-            if m.maze_map[current_location][d] == 1:
+            if m.maze_map[cur_location][d] == 1:
                 if d == 'E':
-                    next_location = (current_location[0],current_location[1]+1)
+                    next_location = (cur_location[0],cur_location[1]+1)
                 elif d=='W':
-                    next_location=(current_location[0],current_location[1]-1)
+                    next_location=(cur_location[0],cur_location[1]-1)
                 elif d=='N':
-                    next_location=(current_location[0]-1,current_location[1])
+                    next_location=(cur_location[0]-1,cur_location[1])
                 elif d=='S':
-                    next_location=(current_location[0]+1,current_location[1])
+                    next_location=(cur_location[0]+1,cur_location[1])
 
-                # dead end
-                if next_location in dead_end:
-                    continue
-
-                # check which agent explored the possible next location
-                if next_location in total_explored:
-                    if next_location in explored[current_agent_idx]:
-                        possible_prev_location.append(next_location)
-                    else:
-                        others_explored_next_location.append(next_location)
-                # The agent should move to cells that have not been traveled by any agent
-                else:
+                # not explored next location
+                if next_location not in total_explored:
                     possible_next_location.append(next_location)
+                # explored by other agents
+                elif next_location not in explored[cur_agent_idx]:
+                    not_explored_next_location.append(next_location)
 
         print(f"possible next location: {possible_next_location}")
-        print(f"possible prev location: {possible_prev_location}")
-        print(f"others explored next location: {others_explored_next_location}")
+        print(f"not explored next location: {not_explored_next_location}")
+        print(f"Current Agent Explored: {explored[cur_agent_idx]}")
+        print(f"Current Agent paths: {paths[cur_agent_idx]}")
+        print("----------------------------")
 
         # If there are several such cells, the agent should choose one arbitrarily
         if possible_next_location:
-            frontier.append((current_agent_idx, possible_next_location[0]))
-            explored[current_agent_idx].append(possible_next_location[0])
+            frontier.append((cur_agent_idx, possible_next_location[0]))
+            explored[cur_agent_idx].append(possible_next_location[0])
             total_explored.append(possible_next_location[0])
-            paths[current_agent_idx].append(possible_next_location[0])
+            paths[cur_agent_idx].append(possible_next_location[0])
+        
+        # If all the locations has been traveled by other agents, the agent should prefer to move to a cell that has not been traveled by it.
+        elif not_explored_next_location:
+            frontier.append((cur_agent_idx, not_explored_next_location[0]))
+            explored[cur_agent_idx].append(not_explored_next_location[0])
+            paths[cur_agent_idx].append(not_explored_next_location[0])
+        
+        # If all the possible directions have already been traveled by the agent, 
+        # or if the agent has reached a dead-end, 
+        # the agent should retreat until a cell that meets one of the previous conditions.
         else:
-            # If there is no cell that has not been traveled by an agent, the agent should prefer to move to a cell that has not been traveled by it.
-            if others_explored_next_location:
-                frontier.append((current_agent_idx, others_explored_next_location[0]))
-                paths[current_agent_idx].append(others_explored_next_location[0])
-                explored[current_agent_idx].append(others_explored_next_location[0])
-            # If all the possible directions have already been traveled by the agent, or if the agent has reached a dead-end, the agent should retreat until a cell that meets one of the previous conditions.
-            else:
-                # When retreating, mark the cells retreated from as “dead end”.
-                dead_end.append(current_location)
-                frontier.append((current_agent_idx, possible_prev_location[0]))
-                paths[current_agent_idx].append(possible_prev_location[0])
+            if cur_location not in dead_end:            
+                dead_end.append(cur_location)
+            prev_location_idx = paths[cur_agent_idx].index(cur_location) - 1
+            prev_location = paths[cur_agent_idx][prev_location_idx]
+            frontier.append((cur_agent_idx, prev_location))
+            paths[cur_agent_idx].append(prev_location)
                 
-
-    print(paths)
+    print(f"Dead End: {dead_end}")
+    print(f"Paths: {paths}")
     return paths
 
 if __name__ == '__main__':
@@ -113,6 +108,6 @@ if __name__ == '__main__':
     
     # Visualize the agents moving in the maze
     m.tracePath({agents[i]:paths[i] for i in range(num_of_agents)})
-    l = textLabel(m, 'Total Path', sum([len(p) for p in paths.values()]))
-    l = textLabel(m, 'Total Time', f"{end_time - start_time:.6f}s")
+    l1 = textLabel(m, 'Total Path', sum([len(p) for p in paths.values()]))
+    l2 = textLabel(m, 'Total Time', f"{end_time - start_time:.6f}s")
     m.run()
