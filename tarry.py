@@ -1,6 +1,4 @@
-from pyamaze import maze, agent, COLOR, textLabel
 import random
-import time
 
 """
 Tarry's Algorithm
@@ -25,6 +23,8 @@ def Tarry(m, num_of_agents):
     explored = {i : [start] for i in range(num_of_agents)}
     total_explored = [start]
 
+    solver_agent_idx = -1
+    
     while frontier:
 
         print(f"frontier: {frontier}")
@@ -32,7 +32,23 @@ def Tarry(m, num_of_agents):
         
         cur_agent_idx, cur_location = frontier.pop(0)
         
+        # this agent solve the maze
         if cur_location == end:
+            if solver_agent_idx == -1:
+                solver_agent_idx = cur_agent_idx
+            continue
+        
+        # the agent found a solver agent path
+        if solver_agent_idx != -1 and cur_location in paths[solver_agent_idx]:
+            print(f"solver path: {paths[solver_agent_idx]}")
+            next_location_idx = len(paths[solver_agent_idx]) - list(reversed(paths[solver_agent_idx])).index(cur_location)
+            #next_location_idx = paths[solver_agent_idx].index(cur_location) + 1
+            next_location = paths[solver_agent_idx][next_location_idx]
+            print(f"next location: {next_location}")
+            frontier.append((cur_agent_idx, next_location))
+            if next_location not in explored[cur_agent_idx]:
+                explored[cur_agent_idx].append(next_location)
+            paths[cur_agent_idx].append(next_location)
             continue
         
         not_explored_next_location = []
@@ -64,16 +80,18 @@ def Tarry(m, num_of_agents):
 
         # If there are several such cells, the agent should choose one arbitrarily
         if possible_next_location:
-            frontier.append((cur_agent_idx, possible_next_location[0]))
-            explored[cur_agent_idx].append(possible_next_location[0])
-            total_explored.append(possible_next_location[0])
-            paths[cur_agent_idx].append(possible_next_location[0])
+            random_next_location = random.choice(possible_next_location)
+            frontier.append((cur_agent_idx, random_next_location))
+            explored[cur_agent_idx].append(random_next_location)
+            total_explored.append(random_next_location)
+            paths[cur_agent_idx].append(random_next_location)
         
         # If all the locations has been traveled by other agents, the agent should prefer to move to a cell that has not been traveled by it.
         elif not_explored_next_location:
-            frontier.append((cur_agent_idx, not_explored_next_location[0]))
-            explored[cur_agent_idx].append(not_explored_next_location[0])
-            paths[cur_agent_idx].append(not_explored_next_location[0])
+            random_next_location = random.choice(not_explored_next_location)
+            frontier.append((cur_agent_idx, random_next_location))
+            explored[cur_agent_idx].append(random_next_location)
+            paths[cur_agent_idx].append(random_next_location)
         
         # If all the possible directions have already been traveled by the agent, 
         # or if the agent has reached a dead-end, 
@@ -89,25 +107,3 @@ def Tarry(m, num_of_agents):
     print(f"Dead End: {dead_end}")
     print(f"Paths: {paths}")
     return paths
-
-if __name__ == '__main__':
-
-    # Set Variables
-    colors = [COLOR.blue, COLOR.green, COLOR.cyan]
-    num_of_agents = 1
-
-    # Create Maze
-    m = maze()
-    m.CreateMaze(loopPercent=50)
-    agents = [agent(m, footprints=True, filled=True, color=colors[i]) for i in range(num_of_agents)]
-
-    # Execute the Tarry's Algorithm
-    start_time = time.time()
-    paths = Tarry(m, num_of_agents)
-    end_time = time.time()
-    
-    # Visualize the agents moving in the maze
-    m.tracePath({agents[i]:paths[i] for i in range(num_of_agents)})
-    l1 = textLabel(m, 'Total Path', sum([len(p) for p in paths.values()]))
-    l2 = textLabel(m, 'Total Time', f"{end_time - start_time:.6f}s")
-    m.run()
