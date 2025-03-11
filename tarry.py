@@ -27,8 +27,7 @@ def Tarry(m, num_of_agents):
     
     while frontier:
 
-        print(f"frontier: {frontier}")
-        print(f"total explored: {total_explored}")
+        #print(f"frontier: {frontier}")
         
         cur_agent_idx, cur_location = frontier.pop(0)
         
@@ -40,11 +39,10 @@ def Tarry(m, num_of_agents):
         
         # the agent found a solver agent path
         if solver_agent_idx != -1 and cur_location in paths[solver_agent_idx]:
-            print(f"solver path: {paths[solver_agent_idx]}")
+            #print(f"solver path: {paths[solver_agent_idx]}")
             next_location_idx = len(paths[solver_agent_idx]) - list(reversed(paths[solver_agent_idx])).index(cur_location)
-            #next_location_idx = paths[solver_agent_idx].index(cur_location) + 1
             next_location = paths[solver_agent_idx][next_location_idx]
-            print(f"next location: {next_location}")
+            #print(f"next location: {next_location}")
             frontier.append((cur_agent_idx, next_location))
             if next_location not in explored[cur_agent_idx]:
                 explored[cur_agent_idx].append(next_location)
@@ -72,11 +70,11 @@ def Tarry(m, num_of_agents):
                 elif next_location not in explored[cur_agent_idx]:
                     not_explored_next_location.append(next_location)
 
-        print(f"possible next location: {possible_next_location}")
-        print(f"not explored next location: {not_explored_next_location}")
-        print(f"Current Agent Explored: {explored[cur_agent_idx]}")
-        print(f"Current Agent paths: {paths[cur_agent_idx]}")
-        print("----------------------------")
+        #print(f"possible next location: {possible_next_location}")
+        #print(f"not explored next location: {not_explored_next_location}")
+        #print(f"Current Agent Explored: {explored[cur_agent_idx]}")
+        #print(f"Current Agent paths: {paths[cur_agent_idx]}")
+        #print("----------------------------")
 
         # If there are several such cells, the agent should choose one arbitrarily
         if possible_next_location:
@@ -104,6 +102,6 @@ def Tarry(m, num_of_agents):
             frontier.append((cur_agent_idx, prev_location))
             paths[cur_agent_idx].append(prev_location)
                 
-    print(f"Dead End: {dead_end}")
-    print(f"Paths: {paths}")
+    #print(f"Dead End: {dead_end}")
+    #print(f"Paths: {paths}")
     return paths
