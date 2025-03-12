@@ -1,6 +1,5 @@
-import random
 import math
-from pyamaze import agent, COLOR, maze
+from pyamaze import agent, COLOR
 
 """
 Tarry's Algorithm
@@ -34,11 +33,12 @@ class Agent:
         self.agent = agent(m, shape='arrow', footprints=True, color=colors[agent_idx])
         self.dead_end = []
         start = (m.rows, m.cols)
-        self.path = [start]
+        self.path = [start] * (agent_idx + 1)
         self.explored = [start]
         self.total_explored = [start]
         self.solver_agent_path = []
         self.sensor_len = sensor_len
+        self.nearby_agents_location = []
     
     def find_nearby_agents(self, agents):
         current_x, current_y = self.path[-1]
@@ -56,7 +56,11 @@ class Agent:
     
     def communicate_with_nearby_agents(self, nearby_agents):
         # update explored cells and dead end from the other agents
+        nearby_agents_location = []
         for agent in nearby_agents:
+
+            nearby_agents_location.append(agent.path[-1])
+
             for de in agent.dead_end:
                 if de not in self.dead_end:
                     self.dead_end.append(de)
@@ -67,6 +71,12 @@ class Agent:
         
             if not self.solver_agent_path and agent.path[-1] == (1, 1):
                 self.solver_agent_path = agent.path
+    
+    def get_nearby_agents_location(self, next_location, nearby_agents):
+        for agent in nearby_agents:
+            if agent.path[-1] == next_location:
+                return True
+        return False
     
     def move(self):
         current_location = self.path[-1]
@@ -108,16 +118,20 @@ class Agent:
         
         # If there are several such cells, the agent should choose one arbitrarily
         if not_explored_by_all_agent_location:
-            random_next_location = random.choice(not_explored_by_all_agent_location)
-            self.explored.append(random_next_location)
-            self.total_explored.append(random_next_location)
-            self.path.append(random_next_location)
+            for next_location in not_explored_by_all_agent_location:
+                if next_location not in self.nearby_agents_location:
+                    self.explored.append(next_location)
+                    self.total_explored.append(next_location)
+                    self.path.append(next_location)
+                    break
         
         # If all the locations has been traveled by other agents, the agent should prefer to move to a cell that has not been traveled by it.
         elif not_explored_by_this_agent_location:
-            random_next_location = random.choice(not_explored_by_this_agent_location)
-            self.explored.append(random_next_location)
-            self.path.append(random_next_location)
+            for next_location in not_explored_by_this_agent_location:
+                if next_location not in self.nearby_agents_location:
+                    self.explored.append(next_location)
+                    self.path.append(next_location)
+                    break
         
         # If all the possible directions have already been traveled by the agent, 
         # or if the agent has reached a dead-end, 
@@ -172,13 +186,5 @@ def Tarry(m, num_of_agents):
         if is_solved(frontier):
             break
 
-    
-    return paths
-
-if __name__ == '__main__':
-    m = maze(10, 10)
-    m.CreateMaze(loadMaze="/Users/sonmyungsoo/Downloads/multi-agent-maze-solver/maze/small_100.csv", theme='light')
-    paths = Tarry(m, 2)
     p = {agent.agent : path for agent, path in paths.items()}
-    m.tracePath(p)
-    m.run()
+    return p
