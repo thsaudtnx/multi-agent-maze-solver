@@ -1,5 +1,6 @@
 import math
 from pyamaze import agent, COLOR
+import time
 
 """
 Tarry's Algorithm
@@ -15,22 +16,19 @@ the agent should retreat until a cell that meets one of the previous conditions.
 
 # Set Global Variables
 colors = [
-    COLOR.black, 
-    COLOR.blue, 
-    COLOR.cyan, 
-    COLOR.dark, 
-    COLOR.green, 
-    COLOR.light, 
-    COLOR.red, 
-    COLOR.yellow
+    COLOR.black,
+    COLOR.red,
+    COLOR.cyan,
+    COLOR.blue,
+    COLOR.yellow, 
 ]
         
 class Agent:
 
-    def __init__(self, m, agent_idx, sensor_len = 5):
+    def __init__(self, m, agent_idx, sensor_len):
         self.agent_idx = agent_idx
         self.m = m
-        self.agent = agent(m, shape='arrow', footprints=True, color=colors[agent_idx])
+        self.agent = agent(m, shape='arrow', footprints=True, color=colors[agent_idx % 5])
         self.dead_end = []
         start = (m.rows, m.cols)
         self.path = [start] * (agent_idx + 1)
@@ -80,10 +78,6 @@ class Agent:
     
     def move(self):
         current_location = self.path[-1]
-
-        # if current agent already reach the goal
-        if current_location == (1, 1):
-            return
         
         # if current agent is following the solver agent path
         if current_location in self.solver_agent_path:
@@ -151,34 +145,38 @@ def is_solved(agents):
     return True
 
 
-def Tarry(m, num_of_agents):
+def Tarry(m, num_of_agents, sensor_length):
 
     paths = {}
-    frontier = [Agent(m, agent_idx) for agent_idx in range(num_of_agents)]
+    frontier = [Agent(m, agent_idx, sensor_length) for agent_idx in range(num_of_agents)]
+    total_time = 0
     
     while frontier:
 
         agent = frontier.pop(0)
-        print(f"--- Agent_{agent.agent_idx} ---")
+        #print(f"--- Agent_{agent.agent_idx} ---")
         current_location = agent.path[-1]
-        print(f"Current Location: {agent.path[-1]}")
+        #print(f"Current Location: {agent.path[-1]}")
         if current_location == (1, 1):
             frontier.append(agent)
             continue
         
+        start_time = time.time()
         # agent process
         nearby_agents = agent.find_nearby_agents(frontier)
-        print(f"Nearby Agents: {[agent.agent_idx for agent in nearby_agents]}")
+        #print(f"Nearby Agents: {[agent.agent_idx for agent in nearby_agents]}")
         agent.communicate_with_nearby_agents(nearby_agents)
         agent.move()
+        end_time = time.time()
+        total_time += end_time - start_time
 
         # update the total paths
         paths[agent] = agent.path
 
         locations = {f"Agent_{agent.agent_idx}": path[-1] for agent, path in paths.items()}
 
-        print(f"Next Locations: {locations}")
-        print("-----------------------")
+        #print(f"Next Locations: {locations}")
+        #print("-----------------------")
 
         frontier.append(agent)
 
@@ -187,4 +185,6 @@ def Tarry(m, num_of_agents):
             break
 
     p = {agent.agent : path for agent, path in paths.items()}
-    return p
+    total_time = round(total_time, 6)
+    total_path = sum([len(p) for p in paths.values()])
+    return p, total_time, total_path
