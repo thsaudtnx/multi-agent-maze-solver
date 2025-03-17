@@ -37,6 +37,15 @@ class Agent:
         self.solver_agent_path = []
         self.sensor_len = sensor_len
         self.nearby_agents_location = []
+        self.total_time = 0
+    
+    def start_timer(self):
+        self.start_time = time.time()
+    
+    def end_timer_and_record(self):
+        self.end_time = time.time()
+        self.total_time += self.end_time - self.start_time
+        self.total_time = round(self.total_time, 6)
     
     def find_nearby_agents(self, agents):
         current_x, current_y = self.path[-1]
@@ -149,8 +158,8 @@ def Tarry(m, num_of_agents, sensor_length):
 
     paths = {}
     frontier = [Agent(m, agent_idx, sensor_length) for agent_idx in range(num_of_agents)]
-    total_time = 0
-    
+    first_solver_time = 0
+
     while frontier:
 
         agent = frontier.pop(0)
@@ -159,16 +168,17 @@ def Tarry(m, num_of_agents, sensor_length):
         #print(f"Current Location: {agent.path[-1]}")
         if current_location == (1, 1):
             frontier.append(agent)
+            if first_solver_time == 0:
+                first_solver_time = agent.total_time
             continue
         
-        start_time = time.time()
-        # agent process
+        # Agent Process
+        agent.start_timer()
         nearby_agents = agent.find_nearby_agents(frontier)
         #print(f"Nearby Agents: {[agent.agent_idx for agent in nearby_agents]}")
         agent.communicate_with_nearby_agents(nearby_agents)
         agent.move()
-        end_time = time.time()
-        total_time += end_time - start_time
+        agent.end_timer_and_record()
 
         # update the total paths
         paths[agent] = agent.path
@@ -183,8 +193,12 @@ def Tarry(m, num_of_agents, sensor_length):
         # check if all the agents reach the goal
         if is_solved(frontier):
             break
+    
+    total_time = 0
+    for agent in frontier:
+        total_time += agent.total_time
+    total_time = round(total_time, 6)
 
     p = {agent.agent : path for agent, path in paths.items()}
-    total_time = round(total_time, 6)
     total_path = sum([len(p) for p in paths.values()])
-    return p, total_time, total_path
+    return p, total_time, total_path, first_solver_time

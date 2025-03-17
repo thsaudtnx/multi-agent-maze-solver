@@ -42,17 +42,18 @@ def test_maze(maze_size, loop):
     print(f"--- Test Maze of {maze_size}, {loop} ---")
 
     for agent in agents:
-        print(f"Number of Agents: {agent}")
         best_time = float("inf")
         best_sensor = None
         best_total_path = None
+
+        print(f"Number of Agents: {agent}")
 
         for sensor in sensors:
 
             m = maze(maze_size, maze_size)
             m.CreateMaze(loadMaze=f"maze/maze_{maze_size}_{loop}.csv", theme='light')
 
-            paths, total_time, total_path = Tarry(m, agent, sensor)
+            paths, total_time, total_path, first_solver_time = Tarry(m, agent, sensor)
             m._win.destroy()
 
             if total_time < best_time:
@@ -63,7 +64,8 @@ def test_maze(maze_size, loop):
             print(f"Sensor Length: {sensor}")
             print(f"Total Time: {total_time}")
             print(f"Total Path: {total_path}")
-            print()
+            print(f"First Solver Time: {first_solver_time}")
+            print(f"")
         
         results.append({
             "Number of Agents": agent,
@@ -78,32 +80,37 @@ def test_maze(maze_size, loop):
     df = pd.DataFrame(results)
     plot_results(df)
 
+    # Save table as CSV
+    #table_filename = f"table_{maze_size}_{loop}.csv"
+    #df.to_csv(table_filename, index=False)
+    #print(f"Results saved as {table_filename}")
+    
 def simulate_maze(maze_size, loop, agent, sensor):
 
     m = maze(maze_size, maze_size)
     m.CreateMaze(loadMaze=f"maze/maze_{maze_size}_{loop}.csv", theme='light')
-    paths, total_time, total_path = Tarry(m, agent, sensor)
+    paths, total_time, total_path, first_solver_time = Tarry(m, agent, sensor)
     m.tracePath(paths, delay=100)
     m.run()
-
-    print(f"--- Simulation for maze_{maze_size}_{loop} ---")
-    print(f"Number of Agent: {agent}")
-    print(f"Sensor Length: {sensor}")
-    print(f"Total Time: {total_time}")
-    print(f"Total Path: {total_path}")
     
+def show_maze(maze_size, loop):
+    m = maze(10, 10)
+    m.CreateMaze(loadMaze=f"maze/maze_{10}_{100}.csv", theme='light')
+    m.run()
 
 if __name__ == '__main__':
     #create_maze(10, 0)
     #create_maze(10, 50)
     #create_maze(10, 100)
-    #create_maze(20, 0)
-    #create_maze(20, 50)
-    #create_maze(20, 100)
-    #create_maze(30, 0)
-    #create_maze(30, 50)
-    #create_maze(30, 100)
+
+    #show_maze(10, 0)
+    #show_maze(10, 50)
+    #show_maze(10, 100)
     
     #test_maze(10, 0)
     #test_maze(10, 50)
-    test_maze(10, 100)
+    #test_maze(10, 100)
+
+    simulate_maze(10, 0, 2, 1)
+
+    
