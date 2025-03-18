@@ -90,7 +90,7 @@ def simulate_maze(maze_size, loop, agent, sensor):
     m = maze(maze_size, maze_size)
     m.CreateMaze(loadMaze=f"maze/maze_{maze_size}_{loop}.csv", theme='light')
     paths, total_time, total_path, first_solver_time = Tarry(m, agent, sensor)
-    m.tracePath(paths, delay=5)
+    m.tracePath(paths, delay=100)
     m.run()
     
 def show_maze(maze_size, loop):
