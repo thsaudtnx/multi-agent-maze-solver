@@ -90,7 +90,7 @@ def simulate_maze(maze_size, loop, agent, sensor):
     m = maze(maze_size, maze_size)
     m.CreateMaze(loadMaze=f"maze/maze_{maze_size}_{loop}.csv", theme='light')
     paths, total_time, total_path, first_solver_time = Tarry(m, agent, sensor)
-    m.tracePath(paths, delay=100)
+    m.tracePath(paths, delay=5)
     m.run()
     
 def show_maze(maze_size, loop):
@@ -99,18 +99,53 @@ def show_maze(maze_size, loop):
     m.run()
 
 if __name__ == '__main__':
+    # Maze is already created so no need to run these lines.
     #create_maze(10, 0)
     #create_maze(10, 50)
     #create_maze(10, 100)
 
+    # Shows the maze
     #show_maze(10, 0)
     #show_maze(10, 50)
     #show_maze(10, 100)
     
+    # Show the result of agents with graphs
     #test_maze(10, 0)
     #test_maze(10, 50)
     #test_maze(10, 100)
 
-    simulate_maze(10, 0, 2, 1)
+    # Agent Simulation
+    #simulate_maze(10, 0, 1, 6)
+    #simulate_maze(10, 0, 2, 1)
+    #simulate_maze(10, 0, 3, 1)
+    #simulate_maze(10, 0, 4, 1)
+    #simulate_maze(10, 0, 5, 2)
+    #simulate_maze(10, 0, 6, 1)
+    #simulate_maze(10, 0, 7, 1)
+    #simulate_maze(10, 0, 8, 1)
+    #simulate_maze(10, 0, 9, 1)
+    #simulate_maze(10, 0, 10, 1)
+
+    #simulate_maze(10, 50, 1, 7)
+    #simulate_maze(10, 50, 2, 1)
+    #simulate_maze(10, 50, 3, 1)
+    #simulate_maze(10, 50, 4, 1)
+    #simulate_maze(10, 50, 5, 1)
+    #simulate_maze(10, 50, 6, 1)
+    #simulate_maze(10, 50, 7, 1)
+    #simulate_maze(10, 50, 8, 1)
+    #simulate_maze(10, 50, 9, 1)
+    #simulate_maze(10, 50, 10, 1)
+
+    #simulate_maze(10, 100, 1, 6)
+    #simulate_maze(10, 100, 2, 1)
+    #simulate_maze(10, 100, 3, 2)
+    #simulate_maze(10, 100, 4, 1)
+    #simulate_maze(10, 100, 5, 1)
+    #simulate_maze(10, 100, 6, 1)
+    #simulate_maze(10, 100, 7, 1)
+    #simulate_maze(10, 100, 8, 1)
+    #simulate_maze(10, 100, 9, 1)
+    simulate_maze(10, 100, 10, 1)
 
     
